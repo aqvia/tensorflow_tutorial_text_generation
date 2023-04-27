@@ -19,24 +19,26 @@ example_texts = ['abcdefg', 'xyz']
 # textをtokenに分割する
 chars = tf.strings.unicode_split(example_texts, input_encoding='UTF-8')
 
-# StringLookupレイヤー作成
+# vocabを使用して、StringLookupレイヤー作成
 ids_from_chars = tf.keras.layers.StringLookup(
-    vocabulary=list(vocab), mask_token=None
-)
+    vocabulary=list(vocab), mask_token=None)
+# 各tokenを文字IDに変換する
 ids = ids_from_chars(chars)
-# print(ids)
+# print(ids) # => <tf.RaggedTensor [[40, 41, 42, 43, 44, 45, 46], [63, 64, 65]]>
 
+# この表現を反転して、human-readableな文字列を復元する機能も用意
 chars_from_ids = tf.keras.layers.StringLookup(
-    vocabulary=ids_from_chars.get_vocabulary(), invert=True, mask_token=None
-)
+    vocabulary=ids_from_chars.get_vocabulary(), invert=True, mask_token=None)
+# IDのベクトルから文字を復元する
 chars = chars_from_ids(ids)
-# print(chars)
+# print(chars) # => <tf.RaggedTensor [[b'a', b'b', b'c', b'd', b'e', b'f', b'g'], [b'x', b'y', b'z']]>
 
+# 文字列に結合し直す
 def text_from_ids(ids):
     return tf.strings.reduce_join(chars_from_ids(ids), axis=-1)
 
-# print(text_from_ids(ids))
-# print(text_from_ids(ids).numpy())
+# print(text_from_ids(ids)) # => tf.Tensor([b'abcdefg' b'xyz'], shape=(2,), dtype=string)
+# print(text_from_ids(ids).numpy()) # => [b'abcdefg' b'xyz']
 
 
 all_ids = ids_from_chars(tf.strings.unicode_split(text, 'UTF-8'))
