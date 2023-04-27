@@ -64,3 +64,9 @@ def split_input_target(sequence):
     return input_text, target_text
 
 dataset = sequences.map(split_input_target)
+
+
+# トレーニングバッチを作成
+BATCH_SIZE = 64
+BUFFER_SIZE = 10000
+dataset = (dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_reminder=True).prefetch(tf.data.experimental.AUTOTUNE))
