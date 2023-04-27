@@ -41,15 +41,26 @@ def text_from_ids(ids):
 # print(text_from_ids(ids).numpy()) # => [b'abcdefg' b'xyz']
 
 
+# textをexample sequenceに分割する。各input sequenceはseq_length文字を含む。
+# textをseq_length+1の長さのchunkに分割する
+# e.g. seq_length=4, chunk="Hello" => input seq.="Hell", target seq.="ello"
+
+# tokenに分割したtextを、ベクトルに変換
 all_ids = ids_from_chars(tf.strings.unicode_split(text, 'UTF-8'))
+# テキストベクトルを文字インデックスのstreamに変換する
 ids_dataset = tf.data.Dataset.from_tensor_slices(all_ids)
 # for ids in ids_dataset.take(10):
 #     print(chars_from_ids(ids).numpy().decode('utf-8'))
 
 seq_length = 100
 example_per_epoch = len(text)//(seq_length + 1)
-
 sequences = ids_dataset.batch(seq_length + 1, drop_remainder=True)
+# for seq in sequences.take(5):
+#     print(text_from_ids(seq).numpy())
 
-for seq in sequences.take(5):
-    print(text_from_ids(seq).numpy())
+def split_input_target(sequence):
+    input_text = sequence[:-1]
+    target_text = sequence[1:]
+    return input_text, target_text
+
+dataset = sequences.map(split_input_target)
