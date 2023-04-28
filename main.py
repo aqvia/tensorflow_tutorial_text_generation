@@ -89,10 +89,11 @@ dataset = sequences.map(split_input_target)
 # データをシャッフルし、バッチにパックする
 BATCH_SIZE = 64
 BUFFER_SIZE = 10000
-dataset = (dataset
-           .shuffle(BUFFER_SIZE)
-           .batch(BATCH_SIZE, drop_reminder=True)
-           .prefetch(tf.data.experimental.AUTOTUNE))
+dataset = (
+    dataset
+    .shuffle(BUFFER_SIZE)
+    .batch(BATCH_SIZE, drop_remainder=True)
+    .prefetch(tf.data.experimental.AUTOTUNE))
 
 
 # モデル構築
