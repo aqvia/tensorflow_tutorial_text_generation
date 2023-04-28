@@ -106,3 +106,13 @@ model = MyModel(
     embedding_dim=embedding_dim,
     rnn_units=rnn_units
 )
+
+
+# モデルの試し方
+# 出力の形状を確認
+for input_example_batch, target_example_batch in dataset.take(1):
+    example_batch_predictions = model(input_example_batch)
+    print(example_batch_predictions.shape,
+          "# (batch_size, sequence_length, vocab_size)")
+# summary出力
+model.summary()
