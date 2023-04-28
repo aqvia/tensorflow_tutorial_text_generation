@@ -108,11 +108,14 @@ model = MyModel(
 )
 
 
-# モデルの試し方
-# 出力の形状を確認
+# モデルを試す
 for input_example_batch, target_example_batch in dataset.take(1):
     example_batch_predictions = model(input_example_batch)
-    print(example_batch_predictions.shape,
-          "# (batch_size, sequence_length, vocab_size)")
+    # 出力の形状を確認
+    # print(example_batch_predictions.shape, "# (batch_size, sequence_length, vocab_size)")
 # summary出力
-model.summary()
+# model.summary()
+# 実際の予測を取得
+sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
+sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
+print(sampled_indices)
