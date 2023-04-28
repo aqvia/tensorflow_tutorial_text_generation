@@ -1,4 +1,6 @@
 import tensorflow as tf
+import os
+
 from my_model import MyModel
 
 # シェイクスピアのデータセットをダウンロード
@@ -108,18 +110,40 @@ model = MyModel(
 )
 
 
-# モデルを試す
-for input_example_batch, target_example_batch in dataset.take(1):
-    example_batch_predictions = model(input_example_batch)
-    # 出力の形状を確認
-    # print(example_batch_predictions.shape, "# (batch_size, sequence_length, vocab_size)")
-# summary出力
+# # モデルを試す
+# for input_example_batch, target_example_batch in dataset.take(1):
+#     example_batch_predictions = model(input_example_batch)
+#     # 出力の形状を確認
+#     print(example_batch_predictions.shape, "# (batch_size, sequence_length, vocab_size)")
+# # summary出力
 # model.summary()
-# 実際の予測を取得
-sampled_indices = tf.random.categorical(
-    example_batch_predictions[0], num_samples=1)
-sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
-print(sampled_indices)
-print("Input:\n", text_from_ids(input_example_batch[0]).numpy())
-print()
-print("Next Char Predictions:\n", text_from_ids(sampled_indices).numpy())
+# # 実際の予測を取得
+# sampled_indices = tf.random.categorical(
+#     example_batch_predictions[0], num_samples=1)
+# sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
+# print(sampled_indices)
+# print("Input:\n", text_from_ids(input_example_batch[0]).numpy())
+# print()
+# print("Next Char Predictions:\n", text_from_ids(sampled_indices).numpy())
+
+
+# モデルをトレーニングする
+# 損失関数
+loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+# example_batch_mean_loss = loss(target_example_batch, example_batch_predictions)
+# print("Mean loss:", example_batch_mean_loss)
+# print(tf.exp(example_batch_mean_loss).numpy())
+
+# オプティマイザと損失関数のアタッチ
+model.compile(optimizer='adam', loss=loss)
+
+# トレーニング中におけるチェックポイントの保存
+checkpoint_dir = './training_checkpoints'
+checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}")
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_prefix,
+    save_weights_only=True)
+
+# トレーニングの実行
+EPOCHS = 20
+history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
