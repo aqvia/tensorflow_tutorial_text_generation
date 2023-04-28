@@ -1,4 +1,5 @@
 import tensorflow as tf
+from my_model import MyModel
 
 # シェイクスピアのデータセットをダウンロード
 path_to_file = tf.keras.utils.get_file(
@@ -69,3 +70,15 @@ dataset = sequences.map(split_input_target)
 BATCH_SIZE = 64
 BUFFER_SIZE = 10000
 dataset = (dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_reminder=True).prefetch(tf.data.experimental.AUTOTUNE))
+
+
+# モデル構築
+vocab_size = len(vocab)
+embedding_dim = 256
+rnn_units = 1024
+
+model = MyModel(
+    vocab_size=len(ids_from_chars.get_vocabulary()),
+    embedding_dim=embedding_dim,
+    rnn_units=rnn_units
+)
