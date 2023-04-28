@@ -1,7 +1,9 @@
 import tensorflow as tf
 import os
+import time
 
 from my_model import MyModel
+from one_step import OneStep
 
 # シェイクスピアのデータセットをダウンロード
 path_to_file = tf.keras.utils.get_file(
@@ -147,3 +149,23 @@ checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
 # トレーニングの実行
 EPOCHS = 20
 history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
+
+
+# テキスト生成
+# シングルステップ予測
+one_step_model = OneStep(model, chars_from_ids, ids_from_chars)
+
+start = time.time()
+status = None
+next_char = tf.constant(['ROMEO:'])
+result = [next_char]
+
+for n in range(1000):
+    next_char, states = one_step_model.generate_one_step(
+        next_char, states=states)
+    result.append(next_char)
+
+result = tf.strings.join(result)
+end = time.time()
+print(result[0].numpy().decode('utf-8'), '\n\n' + '_' * 80)
+print(f'\nRun time: {end - start}')
