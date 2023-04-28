@@ -116,6 +116,10 @@ for input_example_batch, target_example_batch in dataset.take(1):
 # summary出力
 # model.summary()
 # 実際の予測を取得
-sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
+sampled_indices = tf.random.categorical(
+    example_batch_predictions[0], num_samples=1)
 sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
 print(sampled_indices)
+print("Input:\n", text_from_ids(input_example_batch[0]).numpy())
+print()
+print("Next Char Predictions:\n", text_from_ids(sampled_indices).numpy())
