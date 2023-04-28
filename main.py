@@ -23,9 +23,18 @@ ids_from_chars = tf.keras.layers.StringLookup(
 chars_from_ids = tf.keras.layers.StringLookup(
     vocabulary=ids_from_chars.get_vocabulary(), invert=True, mask_token=None)
 
-# 文字列に結合し直す
+
 def text_from_ids(ids):
+    """文字列に結合し直す
+
+    Args:
+        ids (tf.RaggedTensor): 文字IDのテンソル
+
+    Returns:
+        tf.Tensor(dtype=string): 文字列のテンソル
+    """
     return tf.strings.reduce_join(chars_from_ids(ids), axis=-1)
+
 
 # 例
 example_texts = ['abcdefg', 'xyz']
@@ -58,18 +67,32 @@ sequences = ids_dataset.batch(seq_length + 1, drop_remainder=True)
 # for seq in sequences.take(5):
 #     print(text_from_ids(seq).numpy())
 
+
 def split_input_target(sequence):
+    """シーケンスを受け取り、各タイムステップの入力とラベルを揃える
+
+    Args:
+        sequence (tf.RaggedTensor)
+
+    Returns:
+        (tf.RaggedTensor, tf.RaggedTensor)
+    """
     input_text = sequence[:-1]
     target_text = sequence[1:]
     return input_text, target_text
+
 
 dataset = sequences.map(split_input_target)
 
 
 # トレーニングバッチを作成
+# データをシャッフルし、バッチにパックする
 BATCH_SIZE = 64
 BUFFER_SIZE = 10000
-dataset = (dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_reminder=True).prefetch(tf.data.experimental.AUTOTUNE))
+dataset = (dataset
+           .shuffle(BUFFER_SIZE)
+           .batch(BATCH_SIZE, drop_reminder=True)
+           .prefetch(tf.data.experimental.AUTOTUNE))
 
 
 # モデル構築
